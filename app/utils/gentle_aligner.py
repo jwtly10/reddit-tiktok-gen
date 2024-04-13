@@ -3,8 +3,6 @@ import os
 
 from app.utils.logger import log
 
-from app.utils.file_utils import clean_up_file
-
 
 class GentleAligner:
     def __init__(self):
@@ -51,19 +49,17 @@ class GentleAligner:
                 )
                 raise e
 
-    def generate_srt(self, aligned_object: dict, file_name: str):
+    def generate_srt(self, aligned_object: dict, output_path: str):
         """
         Generate an SRT file from the aligned object.
 
         Args:
             aligned_object (dict): The aligned object containing the words and their timings.
-            file_name (str): The name of the SRT file to be generated.
+            output_path (str): The path to save the SRT file.
 
         Returns:
             None
         """
-
-        srt_path = os.path.join("tmp/srt", f"{file_name}.srt")
 
         srt_content = ""
         counter = 1
@@ -88,5 +84,5 @@ class GentleAligner:
             srt_content += f"{counter}\n{start_srt} --> {end_srt}\n{item['word']}\n\n"
             counter += 1
 
-        with open(srt_path, "w") as f:
+        with open(output_path, "w") as f:
             f.write(srt_content)

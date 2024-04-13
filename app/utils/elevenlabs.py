@@ -10,8 +10,7 @@ class ElevenLabs(TTS):
     def __init__(self):
         pass
 
-    def generate_mp3(self, text: str, gender: str, output_filename: str):
-        audio_directory = "tmp/audio"
+    def generate_mp3(self, text: str, gender: str, output_path: str):
         voiceid = (
             ElevenLabsVoiceId.SOFT_FEMALE
             if gender == "f"
@@ -34,10 +33,6 @@ class ElevenLabs(TTS):
             "voice_settings": {"stability": 0.5, "similarity_boost": 0.5},
         }
 
-        # create audio directory if it doesnt already exist
-        os.makedirs(audio_directory, exist_ok=True)
-
-        file_path = os.path.join(audio_directory, f"{output_filename}.mp3")
         try:
             response = requests.post(url, json=data, headers=headers)
             response.raise_for_status()
@@ -48,7 +43,7 @@ class ElevenLabs(TTS):
             log.error(f"Unexpected error requests ElevenLabs: {e}")
             raise e
 
-        with open(file_path, "wb") as f:
+        with open(output_path, "wb") as f:
             for chunk in response.iter_content(chunk_size=CHUNK_SIZE):
                 if chunk:
                     f.write(chunk)

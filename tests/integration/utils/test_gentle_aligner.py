@@ -34,9 +34,6 @@ Neither she nor my ex can afford a hotel. He can't drive her back because of his
             self.transcript, self.audio_file_path
         )
 
-        with open("./test.txt", "w") as f:
-            f.write(aligned)
-
         self.assertIsNotNone(aligned)
         self.assertGreater(len(aligned), 0, "Generated AlignedObject is empty.")
 

@@ -1,7 +1,10 @@
 .env
-/tmp/*
+tmp/
 .vscode
 app.log*
+media/
+ignore/
+.DS_Store
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
