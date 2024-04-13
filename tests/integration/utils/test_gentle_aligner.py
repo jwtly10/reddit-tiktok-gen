@@ -23,8 +23,8 @@ Neither she nor my ex can afford a hotel. He can't drive her back because of his
         )
         self.gentle_aligner = GentleAligner()
 
-    def test_generate_srt(self):
-        """Test that the SRT file is generated correctly using GentleAligner"""
+    def test_generate_aligned(self):
+        """Test that the aligned object is generated correctly using GentleAligner"""
         gentle_aligner_url = os.getenv("GENTLE_ALIGNER_URL")
         if not gentle_aligner_url:
             self.fail("GENTLE_ALIGNER_URL environment variable not set")
@@ -33,6 +33,9 @@ Neither she nor my ex can afford a hotel. He can't drive her back because of his
         aligned = self.gentle_aligner.generate_aligned(
             self.transcript, self.audio_file_path
         )
+
+        with open("./test.txt", "w") as f:
+            f.write(aligned)
 
         self.assertIsNotNone(aligned)
         self.assertGreater(len(aligned), 0, "Generated AlignedObject is empty.")
