@@ -20,6 +20,7 @@ class TestElevenLabs(unittest.TestCase):
         if not api_key:
             self.fail("ELEVENLABS_API_KEY environment variable not set")
 
+        # Raises execption, failing test we cannot generate mp3
         self.eleven_labs.generate_mp3(self.text, self.gender, self.filename)
 
         audio_directory = "tmp/audio"
