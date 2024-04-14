@@ -32,8 +32,32 @@ def resize_video(video_path: str, output_path: str):
         .run(overwrite_output=True)
     )
 
+def split_video_at_time(video_path: str, start_time: str, duration: float, output_path: str):
+    """
+    Split a video at a specific time and save the segment as a new video file.
 
-def split_video(video_path: str, duration: float, output_pattern: str):
+    Args:
+    video_path (str): The path to the input video file.
+    start_time (str): The time in HH:MM:SS format to start the split.
+    duration (float): The duration of the segment in seconds.
+    output_path (str): The path to save the output video file.
+    """
+
+    log.info("Splitting video at time...")
+    log.debug("Video path: %s", video_path)
+    log.debug("Start time: %s", start_time)
+    log.debug("Duration: %s", duration)
+    log.debug("Output path: %s", output_path)
+
+    (
+        ffmpeg.input(video_path, ss=start_time)
+        .output(output_path, t=duration, c="copy")
+        .run(overwrite_output=True)
+    )
+
+
+
+def split_video(video_path: str, duration: float, output_pattern_path: str):
     """
     Split a video into multiple segments of specified duration.
     Note: This has not been tested, this is just a utility function, for running as a script.
@@ -41,18 +65,18 @@ def split_video(video_path: str, duration: float, output_pattern: str):
     Args:
     video_path (str): The path to the input video file.
     duration (int): The duration of each segment in seconds.
-    output_pattern (str): The output filename pattern with a placeholder for the segment number.
+    output_pattern (str): The output filename pattern with a placeholder for the segment number. ie this/is/a/path/output%01d.mp4
     """
 
     log.info("Splitting video...")
     log.debug("Video path: %s", video_path)
     log.debug("Duration: %d", duration)
-    log.debug("Output pattern: %s", output_pattern)
+    log.debug("Output pattern: %s", output_pattern_path)
 
     (
         ffmpeg.input(video_path)
         .output(
-            output_pattern,
+            output_pattern_path,
             format="segment",
             segment_time=duration,
             c="copy",

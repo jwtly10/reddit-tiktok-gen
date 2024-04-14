@@ -5,6 +5,7 @@ app.log*
 media/
 ignore/
 .DS_Store
+base_background_media
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
