@@ -7,7 +7,12 @@ from app.utils.logger import log
 def load_config():
     load_dotenv()
 
-    required_vars = ["ELEVENLABS_API_KEY", "ENV", "GENTLE_ALIGNER_URL"]
+    required_vars = [
+        "ELEVENLABS_API_KEY",
+        "ENV",
+        "GENTLE_ALIGNER_URL",
+        "OPENAI_API_KEY",
+    ]
 
     missing_vars = [var for var in required_vars if not os.getenv(var)]
     if missing_vars:
