@@ -2,6 +2,8 @@ import ffmpeg
 import math
 import os
 
+from typing import cast
+
 from app.utils.logger import log
 
 
@@ -144,7 +146,7 @@ def overlay_image_on_video(
     )
 
 
-def resize_image(image_path: str, target_width: str, output_path: str):
+def resize_image(image_path: str, target_width: int, output_path: str):
     """
     Resize an image to a specified width, keeping the aspect ratio.
 
@@ -323,10 +325,14 @@ if __name__ == "__main__":
     if sys.argv[1] == "resize_video":
         resize_video(sys.argv[2], "cmd_line_output.mp4")
     elif sys.argv[1] == "split_video":
-        split_video(sys.argv[2], sys.argv[3], "cmd_line_looped_output%01d.mp4")
+        split_video(
+            sys.argv[2], cast(float, sys.argv[3]), "cmd_line_looped_output%01d.mp4"
+        )
     elif sys.argv[1] == "loop_video_to_audio":
         audio_duration = get_audio_duration(sys.argv[2])
-        loop_video_to_audio(audio_duration, sys.argv[3], "cmd_line_looped_video.mp4")
+        loop_video_to_audio(
+            cast(float, audio_duration), sys.argv[3], "cmd_line_looped_video.mp4"
+        )
     elif sys.argv[1] == "compress":
         compress_directory("./tests/fixtures/unit/utils/ffmpeg")
     else:

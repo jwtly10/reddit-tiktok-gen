@@ -1,15 +1,16 @@
 import requests
 import os
+from typing import cast
 
 from app.utils.logger import log
 
 
 class GentleAligner:
     def __init__(self):
-        self.baseUrl = os.getenv("GENTLE_ALIGNER_URL")
+        self.baseUrl = cast(str, os.getenv("GENTLE_ALIGNER_URL"))
         pass
 
-    def generate_aligned(self, transcript: str, audio_file_path: str) -> dict:
+    def generate_aligned(self, transcript: str, audio_file_path: str) -> str:
         """
         Generates aligned content by sending a transcript and audio file to the Gentle Aligner Docker Service.
 
@@ -28,6 +29,7 @@ class GentleAligner:
         log.info("Aligning content")
         url = os.path.join(self.baseUrl, "transcriptions?async=false")
 
+        response = None
         with open(audio_file_path, "rb") as audio_file:
             try:
                 response = requests.post(
@@ -39,9 +41,11 @@ class GentleAligner:
                 return response.text
 
             except requests.exceptions.HTTPError as e:
-                log.error(
-                    f"HTTP Error requesting Gentle Aligner Docker Service: {response.status_code} - {e}"
-                )
+                if response is not None:
+                    log.error(
+                        f"HTTP Error requesting Gentle Aligner Docker Service: {response.status_code} - {e}"
+                    )
+
                 raise e
             except Exception as e:
                 log.error(
