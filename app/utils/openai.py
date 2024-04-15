@@ -38,7 +38,6 @@ def determine_gender_from_text(text: str) -> str:
         return res
 
     except Exception as e:
-        print(f"An error occurred making a chat gpt request: {e}")
         log.error(f"An error occurred making a chat gpt request: {e}")
         raise e
 
@@ -73,6 +72,5 @@ def improve_content_from_text(text: str) -> str:
         assert res != None
         return res
     except Exception as e:
-        print(f"An error occurred making a chat gpt request: {e}")
         log.error(f"An error occurred making a chat gpt request: {e}")
         raise e

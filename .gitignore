@@ -7,6 +7,16 @@ ignore/
 .DS_Store
 base_background_media
 
+
+# Test files that should NOT be committed to vs
+tests/fixtures/integration/service/generate/*
+!tests/fixtures/integration/service/generate/pre_content.mp3
+!tests/fixtures/integration/service/generate/pre_title.mp3
+
+
+
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

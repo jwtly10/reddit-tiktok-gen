@@ -1,5 +1,6 @@
 import requests
 import os
+import json
 from typing import cast
 
 from app.utils.logger import log
@@ -10,7 +11,7 @@ class GentleAligner:
         self.baseUrl = cast(str, os.getenv("GENTLE_ALIGNER_URL"))
         pass
 
-    def generate_aligned(self, transcript: str, audio_file_path: str) -> str:
+    def generate_aligned(self, transcript: str, audio_file_path: str) -> dict:
         """
         Generates aligned content by sending a transcript and audio file to the Gentle Aligner Docker Service.
 
@@ -35,7 +36,7 @@ class GentleAligner:
                 response = requests.post(
                     url, data={"transcript": transcript}, files={"audio": audio_file}
                 )
-                log.debug(response)
+                log.debug(f"Aligner res: {response}")
                 response.raise_for_status()
 
                 return response.text
@@ -68,14 +69,18 @@ class GentleAligner:
         srt_content = ""
         counter = 1
 
-        log.debug(f"Aligned object: {aligned_object}")
+        # log.debug(f"Aligned object: {aligned_object}")
+
+        aligned_object = json.loads(aligned_object)
+        log.debug(
+            f"Type of aligned_object (should be json/dict): {type(aligned_object)}"
+        )
 
         for item in aligned_object["words"]:
             if item["case"] != "success":
-                print(f"Error aligning the item: {item}")
+                log.debug(f"Error aligning the item: {item}")
                 continue
 
-            print(f"Item: {item}")
             # Start and end times
             start_time = int(item["start"] * 1000)  # Convert to milliseconds
             end_time = int(item["end"] * 1000)  # Convert to milliseconds
