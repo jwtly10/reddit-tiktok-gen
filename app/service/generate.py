@@ -1,4 +1,8 @@
 import os
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
+
 from app.utils.elevenlabs import ElevenLabs
 from app.utils.gentle_aligner import GentleAligner
 from app.utils.openai import determine_gender_from_text
@@ -14,15 +18,23 @@ from app.utils.ffmpeg import (
     resize_image,
     FFMpegProcessingError,
 )
+
 from app.utils.background_video import get_random_chunk_from_video
+
+from app.repository.job_repository import update_job_step, fail_job
 
 import app.config
 
 from app.utils.logger import log
 
 
-def generate_video_from_content(
-    id: str, title: str, content: str, base_background_video: str, output_dir: str
+async def generate_video_from_content(
+    id: str,
+    title: str,
+    content: str,
+    base_background_video: str,
+    output_dir: str,
+    db: AsyncSession,
 ):
     """
     Generate a video from the given content.
@@ -52,6 +64,7 @@ def generate_video_from_content(
         os.makedirs(output_dir, exist_ok=True)
 
         # Generating audio
+        await update_job_step(db, id, "generating_audio")
         gender = determine_gender_from_text(content)
 
         elevenlabs = ElevenLabs()
@@ -70,6 +83,7 @@ def generate_video_from_content(
         title_audio_duration = get_audio_duration(title_audio)
 
         # Generating SRT
+        await update_job_step(db, id, "generating_srt")
         gentle_aligner = GentleAligner()
         aligned_text = gentle_aligner.generate_aligned(content, content_audio)
 
@@ -77,10 +91,12 @@ def generate_video_from_content(
         gentle_aligner.generate_srt(aligned_text, srt_file)
 
         # Generating Title image
+        await update_job_step(db, id, "generating_title_image")
         # TODO: Add logic to generate title image
         title_image = os.path.join("base_background_media", "reddit_title_template.png")
 
-        # Generating final video
+        # Generating background video
+        await update_job_step(db, id, "generating_background_video")
         video_audio = os.path.join(output_dir, "video.mp3")
         concatenate_audios(title_audio, content_audio, video_audio)
         total_video_audio_length = get_audio_duration(video_audio)
@@ -105,6 +121,8 @@ def generate_video_from_content(
             overlayed_video,
         )
 
+        # Generating final video
+        await update_job_step(db, id, "generating_final_video")
         delayed_srt_file = os.path.join(output_dir, "delayed_content.srt")
         delay_srt(srt_file, title_audio_duration, delayed_srt_file)
 
@@ -112,8 +130,13 @@ def generate_video_from_content(
         embed_srt_and_audio(overlayed_video, video_audio, delayed_srt_file, final_video)
 
         log.info(f"Final video generated at {final_video}")
+        await update_job_step(db, id, "completed", final_video)
 
     except FFMpegProcessingError as e:
         log.error(f"{e}: {e.stderr}")
+        await fail_job(db, id, str(e))
+        raise
     except Exception as e:
         log.error(f"An unexpected error occurred while generating video: {e}")
+        await fail_job(db, id, str(e))
+        raise

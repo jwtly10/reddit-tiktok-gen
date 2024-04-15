@@ -37,6 +37,39 @@
                 transform: scale(1.0);
             }
         }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 280px;
+            background-color: black;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 0;
+            position: absolute;
+            z-index: 999;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Adjusting parent containers to not hide overflow */
+        .bg-white {
+            overflow: visible;
+        }
     </style>
 </head>
 
@@ -45,7 +78,7 @@
 <head>
 </head>
 
-<body class="bg-gray-100 flex items-center justify-center h-screen">
+<body class="bg-gray-100 flex flex-col items-center justify-center h-screen">
     <div class="bg-white p-8 mb-3 rounded-lg shadow-md w-full max-w-md mx-auto">
         <form id="your-form" class="space-y-4">
             <div>
@@ -60,8 +93,9 @@
                 <textarea id="post_content" name="post_content" required
                     class="border-2 border-gray-200 rounded-lg w-full p-2 text-gray-700 focus:outline-none focus:border-blue-500"
                     rows="4"></textarea>
-                <label for="post_video" class="text-sm font-semibold text-gray-700 block pb-2">Post Category</label>
-                <select id="post_video" name="post_category" required
+                <label for="background_video" class="text-sm font-semibold text-gray-700 block pb-2">Background
+                    Video</label>
+                <select id="background_video" name="background_video" required
                     class="border-2 border-gray-200 rounded-lg w-full p-2 text-gray-700 focus:outline-none focus:border-blue-500">
                     <option value="">Select a base background video</option>
                     <option value="minecraft_parkour">Minecraft Parkour</option>
@@ -82,12 +116,13 @@
             </div>
             <div id="success" class="flex flex-col items-center justify-center mt-4 invisible">
                 <p class="text-sm font-semibold text-green-600">
-                    Your video has been generated!
+                    Your video has been generated with id: <span id="video-id"></span>, please check back in a few
+                    minutes.
                 </p>
-                <a id="download-link" href="#"
+                <!-- <a id="download-link" href="#"
                     class="mt-2 bg-green-500 text-white p-2 rounded-lg font-semibold hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 inline-block">
                     Download Video
-                </a>
+                </a> -->
             </div>
             <div id="error" class="flex flex-col items-center justify-center mt-4 invisible">
                 <p class="text-sm font-semibold text-red-600">
@@ -95,7 +130,40 @@
                 </p>
             </div>
         </div>
+
     </div>
+    <div class="container mx-auto px-4 justify-center items-center">
+        <h1 class="text-xl font-bold text-gray-700 my-4">Previously Generated Videos</h1>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for job in jobs %}
+            <div class="bg-white shadow overflow-hidden sm:rounded-lg p-4">
+                <div class="px-4 py-5 sm:px-6">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">{{ job.reddit_title }}</h3>
+                    <div class="tooltip mt-1 max-w-2xl text-sm text-gray-500">
+                        <p>{{ job.reddit_post[:100] }}{% if job.reddit_post|length > 100 %}...{% endif %}</p>
+                        <span class="tooltiptext">{{ job.reddit_post }}</span>
+                    </div>
+                </div>
+                <div class="border-t border-gray-200">
+                    <dl>
+                        <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                            <dt class="text-sm font-medium text-gray-500">Video URL</dt>
+                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"><a target="_blank"
+                                    href={{job.final_video_path}}>See Video</a>
+                            </dd>
+                        </div>
+                        <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                            <dt class="text-sm font-medium text-gray-500">Status</dt>
+                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ job.step }}</dd>
+                        </div>
+                        <!-- Add more fields as necessary -->
+                    </dl>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
 
     <script>
         $(document).ready(function () {
@@ -111,12 +179,14 @@
                         if (data.success) {
                             $('#loading').removeClass('visible').addClass('invisible');
                             $('#success').removeClass('invisible').addClass('visible');
-                            $('#download-link').attr('href', data.output_path);
-                        } else {
-                            $('#loading').removeClass('visible');
-                            $('#error').removeClass('invisible').addClass('visible');
-                            $('#error-message').text(data.error);
+                            $('#video-id').text(data.video_id);
                         }
+                    },
+                    error: function (data) {
+                        console.log(data)
+                        $('#loading').removeClass('visible').addClass('invisible');
+                        $('#error').removeClass('invisible').addClass('visible');
+                        $('#error-message').text(data.responseJSON.error);
                     }
                 });
             });

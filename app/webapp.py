@@ -1,13 +1,20 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request
+from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import FastAPI, Request, Form, Depends, BackgroundTasks
 from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
+import os
 import asyncio
 
-from app.service.database import init_db
+from app.service.generate import generate_video_from_content
+
+
+from app.service.database import init_db, get_db_session
 
 from app.utils.logger import log
+
+from app.repository.job_repository import add_job, get_jobs_that_are_completed
 
 
 @asynccontextmanager
@@ -17,25 +24,70 @@ async def lifespan(app: FastAPI):
     log.info("Database initialized.")
     yield
 
+
 app = FastAPI(lifespan=lifespan)
 templates = Jinja2Templates(directory="app/templates")
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
+os.makedirs("tmp", exist_ok=True)
+app.mount("/tmp", StaticFiles(directory="tmp"), name="tmp")
+
+
 @app.get("/")
-async def read_root(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+async def read_root(request: Request, db: AsyncSession = Depends(get_db_session)):
+    completed_jobs = await get_jobs_that_are_completed(db)
+    return templates.TemplateResponse(
+        "index.html", {"request": request, "jobs": completed_jobs}
+    )
+
+
+def run_async(func, *args, **kwargs):
+    """Helper function to run a function asynchronously"""
+    asyncio.create_task(func(*args, **kwargs))
+
 
 @app.post("/")
-async def post_root():
-    # try:
-    #     raise Exception("This is a placeholder error")
-    # except Exception as e:
-    #     return jsonify({"success": False, "error": str(e)})
-    await asyncio.sleep(3)
-    result = "This is a placeholder result"
-    return JSONResponse(content={"output_path": result, "success": True})
+async def post_root(
+    background_tasks: BackgroundTasks,
+    post_title: str = Form(...),
+    post_content: str = Form(...),
+    background_video: str = Form(...),
+    db: AsyncSession = Depends(get_db_session),
+):
+    log.info("Received a video generation request")
+    log.debug(f"Title: {post_title}")
+    log.debug(f"Content: {post_content}")
+    log.debug(f"Background Video: {background_video}")
+
+    try:
+        job = await add_job(db, post_title, post_content, background_video)
+        log.info(f"Job created with ID: {job.id}")
+
+        output_dir = os.path.join("tmp", str(job.id))
+        os.makedirs(output_dir, exist_ok=True)
+
+        background_video = os.path.join(
+            "base_background_media", "minecraft_background_video_1.mp4"
+        )
+
+        background_tasks.add_task(
+            generate_video_from_content,
+            job.id,
+            post_title,
+            post_content,
+            background_video,
+            output_dir,
+            db,
+        )
+
+        return JSONResponse(
+            content={"video_id": job.id, "message": "Video generation request queued"}
+        )
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=500)
+
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8080, log_level="debug")
 
+    uvicorn.run(app, host="0.0.0.0", port=8080, log_level="debug")
