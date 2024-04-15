@@ -51,6 +51,7 @@ def generate_video_from_content(
 
         os.makedirs(output_dir, exist_ok=True)
 
+        # Generating audio
         gender = determine_gender_from_text(content)
 
         elevenlabs = ElevenLabs()
@@ -60,12 +61,6 @@ def generate_video_from_content(
         content_audio = os.path.join(output_dir, "content.mp3")
         buffer_audio(pre_content_audio, "END", 1, content_audio)
 
-        gentle_aligner = GentleAligner()
-        aligned_text = gentle_aligner.generate_aligned(content, content_audio)
-
-        srt_file = os.path.join(output_dir, "content.srt")
-        gentle_aligner.generate_srt(aligned_text, srt_file)
-
         pre_title_audio = os.path.join(output_dir, "pre_title.mp3")
         elevenlabs.generate_mp3(title, gender, pre_title_audio)
         pre_title_audio_duration = get_audio_duration(pre_title_audio)
@@ -74,9 +69,18 @@ def generate_video_from_content(
         buffer_audio(pre_title_audio, "END", 1, title_audio)
         title_audio_duration = get_audio_duration(title_audio)
 
+        # Generating SRT
+        gentle_aligner = GentleAligner()
+        aligned_text = gentle_aligner.generate_aligned(content, content_audio)
+
+        srt_file = os.path.join(output_dir, "content.srt")
+        gentle_aligner.generate_srt(aligned_text, srt_file)
+
+        # Generating Title image
         # TODO: Add logic to generate title image
         title_image = os.path.join("base_background_media", "reddit_title_template.png")
 
+        # Generating final video
         video_audio = os.path.join(output_dir, "video.mp3")
         concatenate_audios(title_audio, content_audio, video_audio)
         total_video_audio_length = get_audio_duration(video_audio)

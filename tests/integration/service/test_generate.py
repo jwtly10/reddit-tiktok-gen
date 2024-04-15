@@ -1,6 +1,6 @@
 import unittest
 import os
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 import app.service.generate as generate
 
 
@@ -45,10 +45,6 @@ class TestVideoGeneration(unittest.TestCase):
 
         self.assertTrue(os.path.exists(expected_final_video_path))
         self.assertTrue(os.path.getsize(expected_final_video_path) > 0)
-
-    def tearDown(self):
-        """Clean up anything thats not needed after test"""
-
 
 if __name__ == "__main__":
     unittest.main()

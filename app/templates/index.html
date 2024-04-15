@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reddit Tiktok Post Generator</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .loading-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #3490dc;
+            border-radius: 50%;
+            display: inline-block;
+            animation: loading-dot 1.4s infinite ease-in-out both;
+        }
+
+        .loading-dot:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        .loading-dot:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+
+        @keyframes loading-dot {
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0);
+            }
+
+            40% {
+                transform: scale(1.0);
+            }
+        }
+    </style>
+</head>
+
+<html>
+
+<head>
+</head>
+
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div class="bg-white p-8 mb-3 rounded-lg shadow-md w-full max-w-md mx-auto">
+        <form id="your-form" class="space-y-4">
+            <div>
+                <label for="post_title" class="text-sm font-semibold text-gray-700 block pb-2">Reddit Title</label>
+                <input id="post_title" type="text" name="post_title" required
+                    class="border-2 border-gray-200 rounded-lg w-full p-2 text-gray-700 focus:outline-none focus:border-blue-500">
+            </div>
+
+            <div>
+                <label for="post_content" class="text-sm font-semibold text-gray-700 block pb-2">Reddit Post
+                    Content</label>
+                <textarea id="post_content" name="post_content" required
+                    class="border-2 border-gray-200 rounded-lg w-full p-2 text-gray-700 focus:outline-none focus:border-blue-500"
+                    rows="4"></textarea>
+                <label for="post_video" class="text-sm font-semibold text-gray-700 block pb-2">Post Category</label>
+                <select id="post_video" name="post_category" required
+                    class="border-2 border-gray-200 rounded-lg w-full p-2 text-gray-700 focus:outline-none focus:border-blue-500">
+                    <option value="">Select a base background video</option>
+                    <option value="minecraft_parkour">Minecraft Parkour</option>
+                </select>
+            </div>
+
+            <button type="submit" id="generate-btn"
+                class="w-full bg-blue-500 text-white p-2 rounded-lg font-semibold hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                Submit
+            </button>
+        </form>
+
+        <div class="flex flex-col items-center mt-4">
+            <div id="loading" class="flex items-center justify-center space-x-2 mt-4 invisible">
+                <div class="loading-dot"></div>
+                <div class="loading-dot"></div>
+                <div class="loading-dot"></div>
+            </div>
+            <div id="success" class="flex flex-col items-center justify-center mt-4 invisible">
+                <p class="text-sm font-semibold text-green-600">
+                    Your video has been generated!
+                </p>
+                <a id="download-link" href="#"
+                    class="mt-2 bg-green-500 text-white p-2 rounded-lg font-semibold hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 inline-block">
+                    Download Video
+                </a>
+            </div>
+            <div id="error" class="flex flex-col items-center justify-center mt-4 invisible">
+                <p class="text-sm font-semibold text-red-600">
+                    An error occurred: <span id="error-message"></span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $('#your-form').on('submit', function (e) {
+                e.preventDefault();
+                $('#loading').removeClass('invisible').addClass('visible');
+                $.ajax({
+                    type: 'POST',
+                    url: '/',
+                    data: $(this).serialize(),
+                    success: function (data) {
+                        $('#loading').hide();
+                        if (data.success) {
+                            $('#loading').removeClass('visible').addClass('invisible');
+                            $('#success').removeClass('invisible').addClass('visible');
+                            $('#download-link').attr('href', data.output_path);
+                        } else {
+                            $('#loading').removeClass('visible');
+                            $('#error').removeClass('invisible').addClass('visible');
+                            $('#error-message').text(data.error);
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+    <script src="/static/js/index.js"></script>
+</body>
+
+</html>
