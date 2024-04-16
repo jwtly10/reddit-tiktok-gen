@@ -13,6 +13,7 @@ from app.utils.ffmpeg import (
 )
 from app.utils.background_video import get_random_chunk_from_video
 from app.utils.gentle_aligner import GentleAligner
+from app.utils.image_generator import generate_title_image
 import os
 import app.config
 
@@ -25,22 +26,20 @@ content = """
 I'll keep it brief because it's so timely. Am I the asshole because it's Father's Day and all I wanted to do was spend time alone in the backyard, smoking a cigar, and listening to music/podcasts by myself? I recognize without kids, I am not a subject of this holiday, but my wife and kids are giving the pass and I'm taking it. Yet part of me still wonders...
 """
 title = """
-AITA Short and sweet
+AITA for wanting to be alone on Father's Day?
 """
 output_dir = os.path.join("scripts", "output")
 os.makedirs(output_dir, exist_ok=True)
 base_background_video = os.path.join(
-"base_background_media", "minecraft_background_video_1.mp4"
+    "base_background_media", "minecraft_background_video_1.mp4"
 )
 
-test_dir  = os.path.join("tests", "fixtures", "integration", "service", "generate")
+test_dir = os.path.join("tests", "fixtures", "integration", "service", "generate")
 
 try:
-
     # Mocking the generation of audio files
     pre_content_audio = os.path.join(test_dir, "pre_content.mp3")
     pre_title_audio = os.path.join(test_dir, "pre_title.mp3")
-
 
     # The rest should 'just work'
     content_audio = os.path.join(output_dir, "content.mp3")
@@ -57,7 +56,8 @@ try:
     srt_file = os.path.join(output_dir, "content.srt")
     gentle_aligner.generate_srt(aligned_text, srt_file)
 
-    title_image = os.path.join("base_background_media", "reddit_title_template.png")
+    title_image = os.path.join(output_dir, "title_image.png")
+    generate_title_image(title_image, title)
 
     video_audio = os.path.join(output_dir, "video.mp3")
     concatenate_audios(title_audio, content_audio, video_audio)
@@ -68,19 +68,19 @@ try:
 
     looped_background_video = os.path.join(output_dir, "looped_background.mp4")
     loop_video_to_audio(
-    total_video_audio_length, background_video, looped_background_video
+        total_video_audio_length, background_video, looped_background_video
     )
-
     video_width = get_video_dimensions(looped_background_video)[0]
+
     resized_title_image = os.path.join(output_dir, "resized_title_image.png")
     resize_image(title_image, video_width, resized_title_image)
 
     overlayed_video = os.path.join(output_dir, "overlayed.mp4")
     overlay_image_on_video(
-    looped_background_video,
-    resized_title_image,
-    pre_title_audio_duration,
-    overlayed_video,
+        looped_background_video,
+        resized_title_image,
+        pre_title_audio_duration,
+        overlayed_video,
     )
 
     delayed_srt_file = os.path.join(output_dir, "delayed_content.srt")
@@ -93,7 +93,3 @@ try:
 
 except FFMpegProcessingError as e:
     log.error(f"FFMpegProcessingError: {e}")
-
-
-
-

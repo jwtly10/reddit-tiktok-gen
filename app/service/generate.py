@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 
 from app.utils.elevenlabs import ElevenLabs
+from app.utils.image_generator import generate_title_image
 from app.utils.gentle_aligner import GentleAligner
 from app.utils.openai import determine_gender_from_text
 from app.utils.ffmpeg import (
@@ -92,8 +93,8 @@ async def generate_video_from_content(
 
         # Generating Title image
         await update_job_step(db, id, "generating_title_image")
-        # TODO: Add logic to generate title image
-        title_image = os.path.join("base_background_media", "reddit_title_template.png")
+        title_image = os.path.join(output_dir, "title_image.png")
+        generate_title_image(title_image, title)
 
         # Generating background video
         await update_job_step(db, id, "generating_background_video")
