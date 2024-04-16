@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Reddit Tiktok Post Generator</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -34,165 +34,233 @@
             }
 
             40% {
-                transform: scale(1.0);
+                transform: scale(1);
             }
         }
-
-        .tooltip {
-            position: relative;
-            display: inline-block;
-            cursor: pointer;
-        }
-
-        .tooltip .tooltiptext {
-            visibility: hidden;
-            width: 280px;
-            background-color: black;
-            color: #fff;
-            text-align: center;
-            border-radius: 6px;
-            padding: 5px 0;
-            position: absolute;
-            z-index: 999;
-            bottom: 125%;
-            left: 50%;
-            transform: translateX(-50%);
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .tooltip:hover .tooltiptext {
-            visibility: visible;
-            opacity: 1;
-        }
-
-        /* Adjusting parent containers to not hide overflow */
-        .bg-white {
-            overflow: visible;
-        }
     </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
 </head>
 
 <html>
 
-<head>
-</head>
+<head> </head>
 
-<body class="bg-gray-100 flex flex-col items-center justify-center h-screen">
-    <div class="bg-white p-8 mb-3 rounded-lg shadow-md w-full max-w-md mx-auto">
-        <form id="your-form" class="space-y-4">
-            <div>
-                <label for="post_title" class="text-sm font-semibold text-gray-700 block pb-2">Reddit Title</label>
-                <input id="post_title" type="text" name="post_title" required
-                    class="border-2 border-gray-200 rounded-lg w-full p-2 text-gray-700 focus:outline-none focus:border-blue-500">
-            </div>
+<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen">
+    <h1 class="text-2xl font-bold text-gray-700 m-9">
+        Reddit Tiktok Video Generator
+    </h1>
+    <div class="flex-grow">
+        <div class="bg-white p-8 mb-3 rounded-lg shadow-md w-full max-w-2xl mx-auto">
+            <form id="your-form" class="space-y-4">
+                <div>
+                    <label for="post_title" class="text-sm font-semibold text-gray-700 block pb-2">Reddit Title</label>
+                    <input id="post_title" type="text" name="post_title" required
+                        class="border-2 border-gray-200 rounded-lg w-full p-2 text-gray-700 focus:outline-none focus:border-blue-500" />
+                </div>
 
-            <div>
-                <label for="post_content" class="text-sm font-semibold text-gray-700 block pb-2">Reddit Post
-                    Content</label>
-                <textarea id="post_content" name="post_content" required
-                    class="border-2 border-gray-200 rounded-lg w-full p-2 text-gray-700 focus:outline-none focus:border-blue-500"
-                    rows="4"></textarea>
-                <label for="background_video" class="text-sm font-semibold text-gray-700 block pb-2">Background
-                    Video</label>
-                <select id="background_video" name="background_video" required
-                    class="border-2 border-gray-200 rounded-lg w-full p-2 text-gray-700 focus:outline-none focus:border-blue-500">
-                    <option value="">Select a base background video</option>
-                    <option value="minecraft_parkour">Minecraft Parkour</option>
-                </select>
-            </div>
+                <div>
+                    <label for="post_content" class="text-sm font-semibold text-gray-700 block pb-2">Reddit Post
+                        Content</label>
+                    <textarea id="post_content" name="post_content" required
+                        class="border-2 border-gray-200 rounded-lg w-full p-2 text-gray-700 focus:outline-none focus:border-blue-500"
+                        rows="4"></textarea>
+                    <label for="background_video" class="text-sm font-semibold text-gray-700 block pb-2">Background
+                        Video</label>
+                    <select id="background_video" name="background_video" required
+                        class="border-2 border-gray-200 rounded-lg w-full p-2 text-gray-700 focus:outline-none focus:border-blue-500">
+                        <option value="" selected>
+                            Select a base background video
+                        </option>
+                        <option value="minecraft_parkour">
+                            Minecraft Parkour
+                        </option>
+                    </select>
+                </div>
 
-            <button type="submit" id="generate-btn"
-                class="w-full bg-blue-500 text-white p-2 rounded-lg font-semibold hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
-                Submit
-            </button>
-        </form>
+                <button type="submit" id="generate-btn"
+                    class="w-full bg-blue-500 text-white p-2 rounded-lg font-semibold hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                    Submit
+                </button>
+            </form>
 
-        <div class="flex flex-col items-center mt-4">
-            <div id="loading" class="flex items-center justify-center space-x-2 mt-4 invisible">
-                <div class="loading-dot"></div>
-                <div class="loading-dot"></div>
-                <div class="loading-dot"></div>
-            </div>
-            <div id="success" class="flex flex-col items-center justify-center mt-4 invisible">
-                <p class="text-sm font-semibold text-green-600">
-                    Your video has been generated with id: <span id="video-id"></span>, please check back in a few
-                    minutes.
-                </p>
-                <!-- <a id="download-link" href="#"
-                    class="mt-2 bg-green-500 text-white p-2 rounded-lg font-semibold hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 inline-block">
-                    Download Video
-                </a> -->
-            </div>
-            <div id="error" class="flex flex-col items-center justify-center mt-4 invisible">
-                <p class="text-sm font-semibold text-red-600">
-                    An error occurred: <span id="error-message"></span>
-                </p>
+            <div class="flex flex-col items-center mt-4">
+                <div id="loading" class="flex items-center justify-center space-x-2 hidden">
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                </div>
+
+                <div id="success" class="flex flex-col items-center justify-center hidden">
+                    <p class="text-sm font-semibold text-green-600">
+                        Your video has been queued with video_id:
+                        <span id="video-id"></span>. Please check back
+                        and refresh in a few minutes.
+                    </p>
+                </div>
+                <div id="error" class="flex flex-col items-center justify-center hidden">
+                    <p class="text-sm font-semibold text-red-600">
+                        An error occurred:
+                        <span id="error-message"></span>
+                    </p>
+                </div>
             </div>
         </div>
 
-    </div>
-    <div class="container mx-auto px-4 justify-center items-center">
-        <h1 class="text-xl font-bold text-gray-700 my-4">Previously Generated Videos</h1>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {% for job in jobs %}
-            <div class="bg-white shadow overflow-hidden sm:rounded-lg p-4">
-                <div class="px-4 py-5 sm:px-6">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900">{{ job.reddit_title }}</h3>
-                    <div class="tooltip mt-1 max-w-2xl text-sm text-gray-500">
-                        <p>{{ job.reddit_post[:100] }}{% if job.reddit_post|length > 100 %}...{% endif %}</p>
-                        <span class="tooltiptext">{{ job.reddit_post }}</span>
+        <div class="container mx-auto px-4 justify-center items-center">
+            <div class="flex justify-between items-center">
+                <h1 class="text-xl font-bold text-gray-700 my-4">
+                    Previously Generated Videos
+                </h1>
+                <button
+                    class="flex items-center justify-center p-2 rounded-full bg-blue-500 hover:bg-blue-600 text-white"
+                    onClick="window.location.reload();">
+                    <svg fill="#ffffff" version="1.1" id="Capa_1" class="w-4 h-4" xmlns="http://www.w3.org/2000/svg"
+                        xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 489.645 489.645" xml:space="preserve"
+                        style="
+                                    --darkreader-inline-fill: #181a1b;
+                                    --darkreader-inline-stroke: #e8e6e3;
+                                " stroke="#ffffff" data-darkreader-inline-fill="" data-darkreader-inline-stroke="">
+                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                        <g id="SVGRepo_iconCarrier">
+                            <g>
+                                <path
+                                    d="M460.656,132.911c-58.7-122.1-212.2-166.5-331.8-104.1c-9.4,5.2-13.5,16.6-8.3,27c5.2,9.4,16.6,13.5,27,8.3 c99.9-52,227.4-14.9,276.7,86.3c65.4,134.3-19,236.7-87.4,274.6c-93.1,51.7-211.2,17.4-267.6-70.7l69.3,14.5 c10.4,2.1,21.8-4.2,23.9-15.6c2.1-10.4-4.2-21.8-15.6-23.9l-122.8-25c-20.6-2-25,16.6-23.9,22.9l15.6,123.8 c1,10.4,9.4,17.7,19.8,17.7c12.8,0,20.8-12.5,19.8-23.9l-6-50.5c57.4,70.8,170.3,131.2,307.4,68.2 C414.856,432.511,548.256,314.811,460.656,132.911z">
+                                </path>
+                            </g>
+                        </g>
+                    </svg>
+                    <span class="ml-2">Refresh</span>
+                </button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for job in jobs %}
+                <div
+                    class="{{ 'bg-red-100' if job.status == 'failed' else 'bg-green-100' if job.status == 'completed' else 'bg-white' }} shadow overflow-hidden sm:rounded-lg p-4">
+                    <div class="px-4 py-5 sm:px-6">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">
+                            {{ job.reddit_title }}
+                        </h3>
+                        <div class="mt-1 max-w-2xl text-sm text-gray-500">
+                            <p>
+                                {{ job.reddit_post[:100] }}{% if
+                                job.reddit_post|length > 100 %} ...
+                                <span type="button" class="text-blue-900" data-tooltip-target="tooltip-{{job.id}}">(see
+                                    more)</span>{% endif %}
+                            </p>
+                        </div>
+                        <div id="tooltip-{{job.id}}" role="tooltip"
+                            class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
+                            {{job.reddit_post}}
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-200">
+                        <dl>
+                            {% if job.status == 'completed' %}
+                            <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                <dt class="text-sm font-medium text-gray-500">
+                                    Video URL
+                                </dt>
+                                <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                    <a target="_blank" href="{{job.final_video_path}}">See Video</a>
+                                </dd>
+                            </div>
+                            {% endif %}
+                            <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                <dt class="text-sm font-medium text-gray-500">
+                                    Status
+                                </dt>
+                                <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                    {{ job.status }}
+                                </dd>
+                            </div>
+                            {% if job.status == 'processing' %}
+                            <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                <dt class="text-sm font-medium text-gray-500">
+                                    Current Step
+                                </dt>
+                                <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                    {{job.step}}
+                                </dd>
+                            </div>
+                            {% endif %} {% if job.status == 'failed' %}
+                            <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                <dt class="text-sm font-medium text-gray-500">
+                                    Failed Step
+                                </dt>
+                                <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                    {{job.step}}
+                                </dd>
+                            </div>
+                            <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                <dt class="text-sm font-medium text-gray-500">
+                                    Error
+                                </dt>
+                                <dd class="mt-1 text-sm text-red-900 sm:mt-0 sm:col-span-2">
+                                    {{ job.error_msg }}
+                                </dd>
+                            </div>
+                            {% endif %}
+                        </dl>
+                    </div>
+                    <div class="mt-4 p-4 bg-gray-100 rounded-lg shadow">
+                        <p class="text-sm text-gray-600">
+                            ID:
+                            <span class="font-semibold">{{ job.id }}</span>
+                        </p>
+                        <p class="text-sm text-gray-600">
+                            Created:
+                            <span class="font-semibold">{{ job.created_at }}</span>
+                        </p>
+                        <p class="text-sm text-gray-600">
+                            Last Updated:
+                            <span class="font-semibold">{{ job.updated_at }}</span>
+                        </p>
                     </div>
                 </div>
-                <div class="border-t border-gray-200">
-                    <dl>
-                        <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt class="text-sm font-medium text-gray-500">Video URL</dt>
-                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"><a target="_blank"
-                                    href={{job.final_video_path}}>See Video</a>
-                            </dd>
-                        </div>
-                        <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt class="text-sm font-medium text-gray-500">Status</dt>
-                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ job.step }}</dd>
-                        </div>
-                        <!-- Add more fields as necessary -->
-                    </dl>
-                </div>
+                {% endfor %}
             </div>
-            {% endfor %}
         </div>
     </div>
-
+    <footer class="text-black text-center p-4">
+        © 2024
+        <a target="_blank" href="https://github.com/jwtly10">Github: jwtly10</a>
+    </footer>
 
     <script>
         $(document).ready(function () {
-            $('#your-form').on('submit', function (e) {
+            $("#your-form").on("submit", function (e) {
                 e.preventDefault();
-                $('#loading').removeClass('invisible').addClass('visible');
+                $("#loading")
+                    .removeClass("invisible")
+                    .addClass("visible");
                 $.ajax({
-                    type: 'POST',
-                    url: '/',
+                    type: "POST",
+                    url: "/",
                     data: $(this).serialize(),
                     success: function (data) {
-                        $('#loading').hide();
-                        if (data.success) {
-                            $('#loading').removeClass('visible').addClass('invisible');
-                            $('#success').removeClass('invisible').addClass('visible');
-                            $('#video-id').text(data.video_id);
+                        $("#loading").hide();
+                        if (data.video_id) {
+                            $("#success").show();
+                            $("#video-id").text(data.video_id);
                         }
                     },
                     error: function (data) {
-                        console.log(data)
-                        $('#loading').removeClass('visible').addClass('invisible');
-                        $('#error').removeClass('invisible').addClass('visible');
-                        $('#error-message').text(data.responseJSON.error);
-                    }
+                        console.log(data);
+                        $("#loading").hide();
+                        $("#error").show();
+                        $("#error-message").text(
+                            data.responseJSON.error,
+                        );
+                    },
                 });
             });
         });
     </script>
     <script src="/static/js/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
 </body>
+
+</html>
 
 </html>

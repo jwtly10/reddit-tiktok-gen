@@ -56,7 +56,7 @@ async def fail_job(session: AsyncSession, job_id: int, error_msg: str) -> Job:
 
 async def get_jobs(session: AsyncSession) -> list[Job]:
     async with session.begin():
-        stmt = select(Job)
+        stmt = select(Job).order_by(Job.id.desc())
         result = await session.execute(stmt)
         jobs = result.scalars().all()
     return jobs
