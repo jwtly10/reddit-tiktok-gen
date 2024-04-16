@@ -21,20 +21,13 @@ class Job(Base):
             "generating_title_image",
             "generating_background_video",
             "generating_final_video",
-            "completed",
             name="step_types",
         ),
         default="new",
     )
-    failed_on = Column(
-        Enum(
-            "generating_audio",
-            "generating_srt",
-            "generating_title_image",
-            "generating_final_video",
-            name="failed_on_types",
-        ),
-        nullable=True,
+    status = Column(
+        Enum("pending", "processing", "completed", "failed", name="status_types"),
+        default="pending",
     )
     error_msg = Column(String, nullable=True)
     created_at = Column(DateTime, default=func.now())

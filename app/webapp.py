@@ -7,6 +7,8 @@ from fastapi.staticfiles import StaticFiles
 import os
 import asyncio
 
+from app.service.task import generate_video
+
 from app.service.generate import generate_video_from_content
 
 
@@ -14,7 +16,7 @@ from app.service.database import init_db, get_db_session
 
 from app.utils.logger import log
 
-from app.repository.job_repository import add_job, get_jobs_that_are_completed
+from app.repository.job_repository import add_job, get_jobs
 
 
 @asynccontextmanager
@@ -35,7 +37,7 @@ app.mount("/tmp", StaticFiles(directory="tmp"), name="tmp")
 
 @app.get("/")
 async def read_root(request: Request, db: AsyncSession = Depends(get_db_session)):
-    completed_jobs = await get_jobs_that_are_completed(db)
+    completed_jobs = await get_jobs(db)
     return templates.TemplateResponse(
         "index.html", {"request": request, "jobs": completed_jobs}
     )
@@ -48,7 +50,6 @@ def run_async(func, *args, **kwargs):
 
 @app.post("/")
 async def post_root(
-    background_tasks: BackgroundTasks,
     post_title: str = Form(...),
     post_content: str = Form(...),
     background_video: str = Form(...),
@@ -70,20 +71,15 @@ async def post_root(
             "base_background_media", "minecraft_background_video_1.mp4"
         )
 
-        background_tasks.add_task(
-            generate_video_from_content,
-            job.id,
-            post_title,
-            post_content,
-            background_video,
-            output_dir,
-            db,
+        generate_video.delay(
+            job.id, post_title, post_content, background_video, output_dir
         )
 
         return JSONResponse(
             content={"video_id": job.id, "message": "Video generation request queued"}
         )
     except Exception as e:
+        log.error(str(e))
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
 

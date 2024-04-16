@@ -29,7 +29,7 @@ from app.utils.logger import log
 
 
 async def generate_video_from_content(
-    id: str,
+    id: int,
     title: str,
     content: str,
     base_background_video: str,
@@ -40,7 +40,7 @@ async def generate_video_from_content(
     Generate a video from the given content.
 
     Args:
-        id (str): The ID of the video.
+        id (int): The ID of the video.
         title (str): The title of the video.
         content (str): The content of the video.
         base_background_video (str): The path to the base background video.

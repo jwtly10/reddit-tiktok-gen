@@ -27,7 +27,16 @@ async def update_job_step(
         stmt = select(Job).filter_by(id=job_id)
         result = await session.execute(stmt)
         job = result.scalar_one()
-        job.step = step
+        # update job to processing if previously pending
+        if job.status == "pending":
+            job.status = "processing"
+
+        # if we 'complete a job' we set the status to completed, but dont change the step
+        if step == "completed":
+            job.status = "completed"
+        else:
+            job.step = step
+
         if final_video_path:
             job.final_video_path = final_video_path
         await session.commit()
@@ -39,16 +48,15 @@ async def fail_job(session: AsyncSession, job_id: int, error_msg: str) -> Job:
         stmt = select(Job).filter_by(id=job_id)
         result = await session.execute(stmt)
         job = result.scalar_one()
-        job.failed_on = job.step
-        job.step = "failed"
+        job.status = "failed"
         job.error_msg = error_msg
         await session.commit()
     return job
 
 
-async def get_jobs_that_are_completed(session: AsyncSession) -> list[Job]:
+async def get_jobs(session: AsyncSession) -> list[Job]:
     async with session.begin():
-        stmt = select(Job).filter_by(step="completed")
+        stmt = select(Job)
         result = await session.execute(stmt)
         jobs = result.scalars().all()
     return jobs
