@@ -153,7 +153,7 @@ def loop_video_to_audio(audio_duration: float, video_path: str, output_path: str
     try:
         (
             ffmpeg.input(video_path, stream_loop=number_of_repeats)
-            .output(output_path, vf=f"trim=duration={audio_duration}", acodec="copy")
+            .output(output_path, vf=f"trim=duration={audio_duration}", acodec="copy", preset="ultrafast")
             .global_args("-loglevel", "error")
             .run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
         )
@@ -230,7 +230,7 @@ def overlay_image_on_video(
                 y="(H-h)/2",
                 enable=f"between(t,0,{duration})",
             )
-            .output(output_path, vcodec="libx264", acodec="copy")
+            .output(output_path, vcodec="libx264", acodec="copy", preset='ultrafast')
             .global_args("-loglevel", "error")
             .run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
         )
@@ -343,7 +343,7 @@ def embed_srt_and_audio(video_path, audio_path, srt_path, output_path):
     log.debug("SRT path: %s", srt_path)
     log.debug("Output path: %s", output_path)
 
-    subtitles_filter = f"subtitles={srt_path}:force_style='FontName=Londrina Solid,FontSize=15,PrimaryColour=&H00ffffff,OutlineColour=&H00000000,BackColour=&H80000000,Bold=1,Italic=0,Alignment=10'"
+    subtitles_filter = f"subtitles={srt_path}:force_style='FontName=Mont,FontSize=20,PrimaryColour=&H00ffffff,OutlineColour=&H00000000,BackColour=&H80000000,Bold=1,Italic=0,Alignment=10,Outline=1'"
     try:
         (
             ffmpeg.input(video_path)
@@ -353,6 +353,7 @@ def embed_srt_and_audio(video_path, audio_path, srt_path, output_path):
                 vf=subtitles_filter,
                 vcodec="libx264",
                 acodec="libmp3lame",
+                preset="ultrafast",
             )
             .global_args("-loglevel", "error")
             .run(overwrite_output=True, capture_stdout=True, capture_stderr=True)

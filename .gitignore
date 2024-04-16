@@ -7,6 +7,7 @@ ignore/
 .DS_Store
 base_background_media
 *.db
+scripts/output
 
 
 # Test files that should NOT be committed to vs
