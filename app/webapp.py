@@ -55,6 +55,12 @@ async def post_root(
     log.debug(f"Content: {post_content}")
     log.debug(f"Background Video: {background_video}")
 
+    if len(post_title) > 125:
+        log.error("Title is too long. Max 124 Characters.")
+        return JSONResponse(
+            content={"error": "Title is too long. Max 124 Characters."}, status_code=400
+        )
+
     try:
         job = await add_job(db, post_title, post_content, background_video)
         log.info(f"Job created with ID: {job.id}")
