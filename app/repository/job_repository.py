@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+import os
 
 from app.model.models import Job
 
@@ -39,6 +40,8 @@ async def update_job_step(
 
         if final_video_path:
             job.final_video_path = final_video_path
+            file_size = os.path.getsize(final_video_path)
+            job.size = f"{file_size / 1024 / 1024:.2f} MB"
         await session.commit()
     return job
 

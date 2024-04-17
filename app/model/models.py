@@ -13,6 +13,7 @@ class Job(Base):
     reddit_post = Column(String, nullable=False)
     background_video = Column(String, nullable=False)
     final_video_path = Column(String, nullable=True)
+    size = Column(String, nullable=True)
     step = Column(
         Enum(
             "new",
