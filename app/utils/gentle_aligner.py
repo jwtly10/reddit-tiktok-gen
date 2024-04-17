@@ -57,7 +57,7 @@ class GentleAligner:
                 )
                 raise e
 
-    def generate_srt(self, aligned_object: dict, output_path: str):
+    def generate_srt(self, aligned_object: str, output_path: str):
         """
         Generate an SRT file from the aligned object.
 
@@ -86,14 +86,13 @@ class GentleAligner:
         temp_start = None
         temp_end = None
 
-
         len_of_aligned_object = len(aligned_object["words"])
 
         # TODO: Clean up this code
         for i in range(0, len_of_aligned_object, 1):
             if aligned_object["words"][i]["case"] != "success":
-                    log.debug(f"Error aligning the item: {aligned_object['words'][i]}")
-                    continue
+                log.debug(f"Error aligning the item: {aligned_object['words'][i]}")
+                continue
 
             # Set the start time of the group
             if not temp_start:
@@ -111,19 +110,23 @@ class GentleAligner:
                 start_srt = f"{start_time // 3600000:02}:{(start_time % 3600000) // 60000:02}:{(start_time % 60000) // 1000:02},{start_time % 1000:03}"
                 end_srt = f"{end_time // 3600000:02}:{(end_time % 3600000) // 60000:02}:{(end_time % 60000) // 1000:02},{end_time % 1000:03}"
 
-                words_str = ' '.join(temp_words)
+                words_str = " ".join(temp_words)
                 srt_content += f"{counter}\n{start_srt} --> {end_srt}\n{words_str}\n\n"
                 continue
 
             # if the next word is capitalized, write the group, but only if the current word is not capitalized
-            if i + 1 < len_of_aligned_object and aligned_object["words"][i + 1]["word"][0].isupper() and aligned_object["words"][i]["word"][0].islower():
+            if (
+                i + 1 < len_of_aligned_object
+                and aligned_object["words"][i + 1]["word"][0].isupper()
+                and aligned_object["words"][i]["word"][0].islower()
+            ):
                 start_time = int(temp_start * 1000)
                 end_time = int(temp_end * 1000)
 
                 start_srt = f"{start_time // 3600000:02}:{(start_time % 3600000) // 60000:02}:{(start_time % 60000) // 1000:02},{start_time % 1000:03}"
                 end_srt = f"{end_time // 3600000:02}:{(end_time % 3600000) // 60000:02}:{(end_time % 60000) // 1000:02},{end_time % 1000:03}"
 
-                words_str = ' '.join(temp_words)
+                words_str = " ".join(temp_words)
                 srt_content += f"{counter}\n{start_srt} --> {end_srt}\n{words_str}\n\n"
                 counter += 1
 
@@ -139,7 +142,7 @@ class GentleAligner:
                 start_srt = f"{start_time // 3600000:02}:{(start_time % 3600000) // 60000:02}:{(start_time % 60000) // 1000:02},{start_time % 1000:03}"
                 end_srt = f"{end_time // 3600000:02}:{(end_time % 3600000) // 60000:02}:{(end_time % 60000) // 1000:02},{end_time % 1000:03}"
 
-                words_str = ' '.join(temp_words)
+                words_str = " ".join(temp_words)
                 srt_content += f"{counter}\n{start_srt} --> {end_srt}\n{words_str}\n\n"
                 counter += 1
 
@@ -149,13 +152,13 @@ class GentleAligner:
 
         # Handle any remaining words that didn't make a full group
         if temp_words:
-            start_time = int(cast(int,temp_start) * 1000)
+            start_time = int(cast(int, temp_start) * 1000)
             end_time = int(cast(int, temp_end) * 1000)
 
             start_srt = f"{start_time // 3600000:02}:{(start_time % 3600000) // 60000:02}:{(start_time % 60000) // 1000:02},{start_time % 1000:03}"
             end_srt = f"{end_time // 3600000:02}:{(end_time % 3600000) // 60000:02}:{(end_time % 60000) // 1000:02},{end_time % 1000:03}"
 
-            words_str = ' '.join(temp_words)
+            words_str = " ".join(temp_words)
             srt_content += f"{counter}\n{start_srt} --> {end_srt}\n{words_str}\n\n"
 
         with open(output_path, "w") as f:
@@ -178,5 +181,3 @@ class GentleAligner:
         result = result.replace(":", " ")
 
         return result
-
-

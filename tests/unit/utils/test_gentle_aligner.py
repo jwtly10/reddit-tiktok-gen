@@ -18,11 +18,8 @@ class TestGentleAligner(unittest.TestCase):
     def test_generate_srt_from_aligned(self):
         """Test that the aligner can generate SRT file from aligned object"""
 
-        aligned = {}
         with open(self.test_fiture_path, "r") as f:
-            aligned = json.load(f)
-
-        print(aligned)
+            aligned = f.read()
 
         os.makedirs("tmp/test", exist_ok=True)
         output_file = os.path.join("tmp/test", self.filename)
