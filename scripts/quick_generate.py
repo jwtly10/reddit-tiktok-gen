@@ -20,6 +20,7 @@ import app.config
 """
 This is a utility script to easily generate a video for testing purposes.
 Uses the gentle aligner docker image and ffmpeg, but no other services.
+By default it uses media files based off of the test fixtures, so you can change the path to your own generated media files.
 """
 
 content = """
@@ -30,9 +31,7 @@ AITA for wanting to be alone on Father's Day?
 """
 output_dir = os.path.join("scripts", "output")
 os.makedirs(output_dir, exist_ok=True)
-base_background_video = os.path.join(
-    "base_background_media", "minecraft_background_video_1.mp4"
-)
+base_background_video = os.path.join("assets", "minecraft_background_video_1.mp4")
 
 test_dir = os.path.join("tests", "fixtures", "integration", "service", "generate")
 

@@ -24,7 +24,7 @@ def generate_title_image(output_path: str, title: str):
 
     title = title.strip()
 
-    template_path = os.path.join("base_background_media", "reddit_title_template.png")
+    template_path = os.path.join("assets", "reddit_title_template.png")
     image = Image.open(template_path)
     draw = ImageDraw.Draw(image)
     font = ImageFont.truetype("Poppins-SemiBold.ttf", 34)

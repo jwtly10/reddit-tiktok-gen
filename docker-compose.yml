@@ -1,0 +1,33 @@
+version: '3.8'
+services:
+  web:
+    build: .
+    ports:
+      - "80:80"
+    depends_on:
+      - redis
+      - gentle-aligner
+    volumes:
+      - data-volume:/data
+      - tmp-volume:/app/tmp  
+    env_file:
+      - .env-docker
+  redis:
+    image: "redis:alpine"
+  celery-worker:
+    build: .
+    command: celery -A app.service.celery_app worker --loglevel=info
+    depends_on:
+      - web
+      - redis
+    volumes:
+      - data-volume:/data
+      - tmp-volume:/app/tmp
+    env_file:
+      - .env-docker
+  gentle-aligner:
+    image: lowerquality/gentle
+
+volumes:
+  data-volume:
+  tmp-volume:

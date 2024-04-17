@@ -1,22 +1,17 @@
+import os
+import asyncio
 from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import FastAPI, Request, Form, Depends, BackgroundTasks
 from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-import os
-import asyncio
-
 from app.service.task import generate_video
-
-from app.service.generate import generate_video_from_content
-
-
 from app.service.database import init_db, get_db_session
-
 from app.utils.logger import log
-
 from app.repository.job_repository import add_job, get_jobs
+
+import app.config
 
 
 @asynccontextmanager
@@ -67,9 +62,7 @@ async def post_root(
         output_dir = os.path.join("tmp", str(job.id))
         os.makedirs(output_dir, exist_ok=True)
 
-        background_video = os.path.join(
-            "base_background_media", "minecraft_background_video_1.mp4"
-        )
+        background_video = os.path.join("assets", "minecraft_background_video_1.mp4")
 
         generate_video.delay(
             job.id, post_title, post_content, background_video, output_dir
@@ -86,4 +79,5 @@ async def post_root(
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8080, log_level="debug")
+    port = os.getenv("SERVER_PORT", 80)
+    uvicorn.run(app, host="0.0.0.0", port=int(port), log_level="debug")

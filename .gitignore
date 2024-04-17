@@ -5,9 +5,11 @@ app.log*
 media/
 ignore/
 .DS_Store
-base_background_media
+assets/minecraft*
 *.db
 scripts/output
+.idea
+.env-docker
 
 
 # Test files that should NOT be committed to vs

@@ -40,7 +40,7 @@ def get_random_chunk_from_video(video_path: str, duration: float, output_path: s
 
 
 def split_video_into_chunks(
-    video_path: str, into: float, output_path: str, file_name: str
+        video_path: str, into: float, output_path: str, file_name: str
 ):
     """
     Splits a background video into multiple chunks.
@@ -62,7 +62,6 @@ def split_video_into_chunks(
     file_name_template = f"{output_path}/{file_name}%01d.mp4"
 
     split_video(video_path, duration_of_chunk, file_name_template)
-
 
 if __name__ == "__main__":
     from app.utils.logger import log

@@ -37,9 +37,7 @@ class TestVideoGeneration(unittest.IsolatedAsyncioTestCase):
         """
         test_id = "tempid"
 
-        test_base_vid_path = os.path.join(
-            "base_background_media", "minecraft_background_video_1.mp4"
-        )
+        test_base_vid_path = os.path.join("assets", "minecraft_background_video_1.mp4")
 
         output_dir = os.path.join(
             "tests",
