@@ -136,6 +136,15 @@ async def generate_video_from_content(
         log.info(f"Final video generated at {final_video}")
         await update_job_step(db, id, "completed", final_video)
 
+        # Clean up temporary files, if in production to save disk space
+        if os.getenv("ENV") == "prod":
+            try:
+                for file in os.listdir(output_dir):
+                    if file != "final.mp4":
+                        os.remove(os.path.join(output_dir, file))
+            except Exception as e:
+                log.error(f"Error while cleaning up temporary files: {e}")
+
     except FFMpegProcessingError as e:
         log.error(f"{e}: {e.stderr}")
         await fail_job(db, id, str(e))
