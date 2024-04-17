@@ -3,10 +3,10 @@ import os
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-from app.utils.elevenlabs import ElevenLabs
+from app.utils.openaitts import OpenAITTS
 from app.utils.image_generator import generate_title_image
 from app.utils.gentle_aligner import GentleAligner
-from app.utils.openai import determine_gender_from_text
+from app.utils.openai import determine_gender_from_text, improve_content_from_text
 from app.utils.ffmpeg import (
     get_audio_duration,
     buffer_audio,
@@ -68,15 +68,18 @@ async def generate_video_from_content(
         await update_job_step(db, id, "generating_audio")
         gender = determine_gender_from_text(content)
 
-        elevenlabs = ElevenLabs()
+        # Improving audio content
+        content = improve_content_from_text(content)
+
+        openaitts = OpenAITTS()
         pre_content_audio = os.path.join(output_dir, "pre_content.mp3")
-        elevenlabs.generate_mp3(content, gender, pre_content_audio)
+        openaitts.generate_mp3(content, gender, pre_content_audio)
 
         content_audio = os.path.join(output_dir, "content.mp3")
         buffer_audio(pre_content_audio, "END", 1, content_audio)
 
         pre_title_audio = os.path.join(output_dir, "pre_title.mp3")
-        elevenlabs.generate_mp3(title, gender, pre_title_audio)
+        openaitts.generate_mp3(title, gender, pre_title_audio)
         pre_title_audio_duration = get_audio_duration(pre_title_audio)
 
         title_audio = os.path.join(output_dir, "title.mp3")
