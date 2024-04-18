@@ -35,6 +35,51 @@ Here is a demo of the starting and usage of the web app that is used to interact
 
 [Web App Demo](https://github.com/jwtly10/reddit-tiktok-gen/assets/39057715/10f6f4b6-d0e1-4b14-ab9b-97beb28c3585)
 
+#### Scripts
+There are also some scripts in `./scripts` that expose some of the functionality of the app.
+
+[./scripts/generate_videos_from_json.py](https://github.com/jwtly10/reddit-tiktok-gen/blob/main/scripts/quick_generate.py)
+Exposes the functionality of the app to generate videos from a JSON file, for example:
+```sh
+python -m scripts.generate_videos_from_json path/to/json/videos.json path/to/output/directory
+```
+
+With the following JSON file
+
+```json
+{
+    "videos": [
+        {
+            "title": "AITA for ignoring my husband during our flight when he expressed anxiety over flying?",
+            "content": "Post Body"
+        },
+        {
+            "title": "AITA for not offering to pay after my niece accidentally ruined my sister’s wedding dress at my barbecue?",
+            "content": "Post Body"
+        },
+        {
+            "title": "AITA for getting upset when a \"family day\" was entirely centered around my sister?",
+            "content": "Post Body"
+        },
+        {
+            "title": "AITA for telling my wife that she should have included my daughter in her \"mother/daughter\" trip?",
+            "content": "Post Body"
+        },
+        {
+            "title": "AITA for not taking the day off to watch my step kid?",
+            "content": "Post Body"
+        }
+    ]
+}
+```
+
+Will generate 5 videos with random backgrounds automatically. A utility tool is available at `http://localhost/tools/json_generator`, to generate the JSON for you with valid json formatting.
+
+<img width="2048" alt="Screenshot 2024-04-18 at 20 14 55" src="https://github.com/jwtly10/reddit-tiktok-gen/assets/39057715/a91e9f3d-7713-44c3-bc44-87d6549c86f2">
+
+This is useful for setting up automations or batch processing of videos.
+
+
 ### Environment Variables
 There are some required environment variables that need to be set in order for the application to work. You can find the example files in the root directory of the project. 
 

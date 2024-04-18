@@ -35,7 +35,7 @@ async def generate_video_from_content(
     content: str,
     base_background_video: str,
     output_dir: str,
-    db: AsyncSession,
+    db: AsyncSession = None,
 ):
     """
     Generate a video from the given content.
@@ -65,7 +65,8 @@ async def generate_video_from_content(
         os.makedirs(output_dir, exist_ok=True)
 
         # Generating audio
-        await update_job_step(db, id, "generating_audio")
+        if db:
+            await update_job_step(db, id, "generating_audio")
         gender = determine_gender_from_text(content)
 
         # Improving audio content
@@ -87,7 +88,8 @@ async def generate_video_from_content(
         title_audio_duration = get_audio_duration(title_audio)
 
         # Generating SRT
-        await update_job_step(db, id, "generating_srt")
+        if db:
+            await update_job_step(db, id, "generating_srt")
         gentle_aligner = GentleAligner()
         aligned_text = gentle_aligner.generate_aligned(content, content_audio)
 
@@ -95,12 +97,14 @@ async def generate_video_from_content(
         gentle_aligner.generate_srt(aligned_text, srt_file)
 
         # Generating Title image
-        await update_job_step(db, id, "generating_title_image")
+        if db:
+            await update_job_step(db, id, "generating_title_image")
         title_image = os.path.join(output_dir, "title_image.png")
         generate_title_image(title_image, title)
 
         # Generating background video
-        await update_job_step(db, id, "generating_background_video")
+        if db:
+            await update_job_step(db, id, "generating_background_video")
         video_audio = os.path.join(output_dir, "video.mp3")
         concatenate_audios(title_audio, content_audio, video_audio)
         total_video_audio_length = get_audio_duration(video_audio)
@@ -126,7 +130,8 @@ async def generate_video_from_content(
         )
 
         # Generating final video
-        await update_job_step(db, id, "generating_final_video")
+        if db:
+            await update_job_step(db, id, "generating_final_video")
         delayed_srt_file = os.path.join(output_dir, "delayed_content.srt")
         delay_srt(srt_file, title_audio_duration, delayed_srt_file)
 
@@ -134,7 +139,8 @@ async def generate_video_from_content(
         embed_srt_and_audio(overlayed_video, video_audio, delayed_srt_file, final_video)
 
         log.info(f"Final video generated at {final_video}")
-        await update_job_step(db, id, "completed", final_video)
+        if db:
+            await update_job_step(db, id, "completed", final_video)
 
         # Clean up temporary files, if in production to save disk space
         if os.getenv("ENV") == "prod":
@@ -147,9 +153,11 @@ async def generate_video_from_content(
 
     except FFMpegProcessingError as e:
         log.error(f"{e}: {e.stderr}")
-        await fail_job(db, id, str(e))
+        if db:
+            await fail_job(db, id, str(e))
         raise
     except Exception as e:
         log.error(f"An unexpected error occurred while generating video: {e}")
-        await fail_job(db, id, str(e))
+        if db:
+            await fail_job(db, id, str(e))
         raise

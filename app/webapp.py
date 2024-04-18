@@ -30,6 +30,11 @@ os.makedirs("tmp", exist_ok=True)
 app.mount("/tmp", StaticFiles(directory="tmp"), name="tmp")
 
 
+@app.get("/tools/json_generator")
+async def json_generator(request: Request):
+    return templates.TemplateResponse("json_generator.html", {"request": request})
+
+
 @app.get("/")
 async def read_root(request: Request, db: AsyncSession = Depends(get_db_session)):
     completed_jobs = await get_jobs(db)

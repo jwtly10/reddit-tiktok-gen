@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Generator Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen p-9 pt-9">
+    <div class="w-full max-w-2xl">
+        <form id="jsonForm" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="title">
+                    Title
+                </label>
+                <input
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    id="title" type="text" placeholder="Enter title">
+            </div>
+            <div class="mb-6">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="content">
+                    Content
+                </label>
+                <textarea
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+                    id="content" placeholder="Enter content"></textarea>
+            </div>
+            <div class="flex items-center justify-between">
+                <button
+                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    type="submit">
+                    Submit
+                </button>
+                <button
+                    class="bg-red-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    type="button" onClick="clearVideos();">
+                    Clear
+                </button>
+            </div>
+        </form>
+    </div>
+    <p>Number of videos: <span id="count"></span></p>
+    <div id="jsonOutput" class="w-full">
+    </div>
+    <script>
+        document.getElementById('jsonForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const title = document.getElementById('title').value;
+
+            if (title.length >= 125) {
+                alert('Title is too long. Please enter a title with less than 125 characters.');
+                return;
+            }
+
+
+            const content = document.getElementById('content').value;
+            addVideoToJson(title, content);
+            document.getElementById('title').value = '';
+            document.getElementById('content').value = '';
+        });
+
+        function addVideoToJson(title, content) {
+            const video = { title: title, content: content };
+            const videos = JSON.parse(localStorage.getItem('videos')) || { "videos": [] };
+            videos.videos.push(video);
+            localStorage.setItem('videos', JSON.stringify(videos));
+            displayVideos();
+        }
+
+        function clearVideos() {
+            localStorage.removeItem('videos');
+            const output = document.getElementById('jsonOutput');
+            console.log("does this happen")
+            output.innerHTML = '';
+        }
+
+        function displayVideos() {
+            const videos = JSON.parse(localStorage.getItem('videos'));
+            const output = document.getElementById('jsonOutput');
+            output.innerHTML = '<pre>' + JSON.stringify(videos, null, 2) + '</pre>';
+
+            const count = document.getElementById('count');
+            count.innerHTML = videos.videos.length;
+
+
+        }
+
+        window.onload = function () {
+            if (localStorage.getItem('videos')) {
+                displayVideos();
+            }
+
+            const title = document.getElementById('title');
+        }
+    </script>
+</body>
+
+</html>
