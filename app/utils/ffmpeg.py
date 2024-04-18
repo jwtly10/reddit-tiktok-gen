@@ -519,7 +519,7 @@ if __name__ == "__main__":
             cast(float, audio_duration), sys.argv[3], "cmd_line_looped_video.mp4"
         )
     elif sys.argv[1] == "compress":
-        compress_directory("./tests/fixtures/unit/utils/ffmpeg")
+        compress_directory(sys.argv[2])
     else:
         print("Invalid command")
         sys.exit(1)

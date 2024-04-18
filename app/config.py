@@ -8,7 +8,6 @@ def load_config():
     load_dotenv()
 
     required_vars = [
-        "ELEVENLABS_API_KEY",
         "ENV",
         "GENTLE_ALIGNER_URL",
         "OPENAI_API_KEY",
