@@ -29,25 +29,8 @@ if sys.argv[1].endswith(".mp4"):
         print(f"Error: {e.stderr}")
         sys.exit(1)
 
-    # Compress this file
-    try:
-        print("Compressing...")
-        compressed_file = os.path.join(output_dir, f"compressed_{file_name}")
-        compress_video(formatted_file, compressed_file)
-    except FFMpegProcessingError as e:
-        print(f"Error: {e.stderr}")
-        sys.exit(1)
+    print(f"Video formatted and saved to {formatted_file}")
 
-    # Clean up
-    try:
-        print("Cleaning up...")
-        os.remove(formatted_file)
-        os.rename(compressed_file, formatted_file)
-    except Exception as e:
-        print(f"Error cleaning up: {e}")
-        sys.exit(1)
-
-    print(f"Formatted video saved to {formatted_file}")
 
 else:
     print("Only .mp4 background videos are supported. Exiting...")

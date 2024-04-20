@@ -10,6 +10,7 @@ assets/minecraft*
 scripts/output
 .idea
 .env-docker
+automation/
 
 
 # Test files that should NOT be committed to vs

@@ -58,7 +58,7 @@ async def main(import_file_path, output_directory):
         title = video["title"]
         content = video["content"]
         base_background_video = os.path.join(
-            "assets", f"minecraft_background_video_{randrange(1)}.mp4"
+            "assets", f"minecraft_background_video_{1}.mp4"
         )
 
         output_dir = os.path.join(output_directory, str(id))
