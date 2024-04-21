@@ -161,8 +161,12 @@ class GentleAligner:
             words_str = " ".join(temp_words)
             srt_content += f"{counter}\n{start_srt} --> {end_srt}\n{words_str}\n\n"
 
-        with open(output_path, "w") as f:
-            f.write(srt_content)
+        try:
+            with open(output_path, "w") as f:
+                f.write(srt_content)
+        except Exception as e:
+            log.error(f"Error writing SRT file: {e}")
+            raise e
 
     def clean_up_transcript(self, transcript: str) -> str:
         """

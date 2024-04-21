@@ -24,10 +24,19 @@ def generate_title_image(output_path: str, title: str):
 
     title = title.strip()
 
-    template_path = os.path.join("assets", "reddit_title_template.png")
-    image = Image.open(template_path)
+        
+    try:
+        template_path = os.path.join("assets", "reddit_title_template.png")
+        image = Image.open(template_path)
+    except Exception as e:
+        raise ValueError(f"Error loading title template: {e}")
+
     draw = ImageDraw.Draw(image)
-    font = ImageFont.truetype("Poppins-SemiBold.ttf", 34)
+
+    try:
+        font = ImageFont.truetype("Poppins-SemiBold.ttf", 34)
+    except Exception as e:
+        raise ValueError(f"Error loading font: {e}")
 
     x = 400
     y = 745
