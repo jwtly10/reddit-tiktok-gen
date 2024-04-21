@@ -34,7 +34,10 @@ def print_progress(current, total, time_taken):
     print(f"+{'-'*48}+")
 
 
-async def main(import_file_path, output_directory):
+async def main(import_file_path, output_directory, config_preset):
+    if config_preset not in app.config.ffmpeg_config:
+        raise ValueError(f"Invalid config preset: {config_preset}")
+
     os.makedirs(output_directory, exist_ok=True)
 
     with open(import_file_path, "r") as f:
@@ -65,7 +68,12 @@ async def main(import_file_path, output_directory):
         os.makedirs(output_dir, exist_ok=True)
 
         await generate_video_from_content(
-            id, title, content, base_background_video, output_dir
+            id,
+            title,
+            content,
+            base_background_video,
+            output_dir,
+            config_preset=config_preset,
         )
 
         print_progress(counter, len(videos), time() - start_time)
@@ -79,15 +87,17 @@ async def main(import_file_path, output_directory):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
+    if len(sys.argv) != 4:
+        print("Incorrect number of arguments")
         print(
-            "Usage: python generate_videos_from_file.py <import_file_path> <output_directory>"
+            "Usage: python generate_videos_from_file.py <import_file_path> <output_directory> <config_preset>"
         )
     else:
         import_file_path = sys.argv[1]
         output_directory = sys.argv[2]
+        config_preset = sys.argv[3]
         try:
-            asyncio.run(main(import_file_path, output_directory))
+            asyncio.run(main(import_file_path, output_directory, config_preset))
         except FFMpegProcessingError as e:
             log.error(str(e.stderr))
             sys.exit(1)

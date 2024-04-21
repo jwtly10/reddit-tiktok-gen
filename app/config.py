@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from app.utils.logger import log
 
 
-def load_config():
+def load_env():
     load_dotenv()
 
     required_vars = [
@@ -20,4 +20,40 @@ def load_config():
     log.info(f"Running in {os.getenv("ENV")}")
 
 
-load_config()
+ffmpeg_config = {
+    "default": {
+        "preset": "medium",
+        "crf": 23,
+        "capture_stdout": True,
+        "capture_stderr": True,
+        "global_args": ["-loglevel", "error"],
+    },
+    "medium_debug": {
+        "preset": "medium",
+        "crf": 23,
+        "capture_stdout": False,
+        "capture_stderr": True,
+        "global_args": [],
+    },
+    "test": {
+        "preset": "ultrafast",
+        "crf": 35,
+        "capture_stdout": False,
+        "capture_stderr": True,
+        "global_args": [],
+    },
+    "production_ssh": {
+        "preset": "slow",
+        "crf": 18,
+        "capture_stdout": False,
+        "capture_stderr": True,
+        "global_args": [],
+    },
+    "low_quality": {
+        "preset": "ultrafast",
+        "crf": 28,
+    },
+}
+
+
+load_env()

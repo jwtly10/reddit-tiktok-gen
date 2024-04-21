@@ -36,6 +36,7 @@ async def generate_video_from_content(
     base_background_video: str,
     output_dir: str,
     db: AsyncSession = None,
+    config_preset: str = "default",
 ):
     """
     Generate a video from the given content.
@@ -56,6 +57,7 @@ async def generate_video_from_content(
     """
     try:
         log.info("Generating video from content")
+        log.debug(f"Config preset: {config_preset}")
         log.debug(f"ID: {id}")
         log.debug(f"Title: {title}")
         log.debug(f"Content: {content}")
@@ -110,11 +112,16 @@ async def generate_video_from_content(
         total_video_audio_length = get_audio_duration(video_audio)
 
         background_video = os.path.join(output_dir, "background.mp4")
-        get_random_chunk_from_video(base_background_video, 60, background_video)
+        get_random_chunk_from_video(
+            base_background_video, 60, background_video, config_preset
+        )
 
         looped_background_video = os.path.join(output_dir, "looped_background.mp4")
         loop_video_to_audio(
-            total_video_audio_length, background_video, looped_background_video
+            total_video_audio_length,
+            background_video,
+            looped_background_video,
+            config_preset,
         )
 
         video_width = get_video_dimensions(looped_background_video)[0]
@@ -127,6 +134,7 @@ async def generate_video_from_content(
             resized_title_image,
             pre_title_audio_duration,
             overlayed_video,
+            config_preset,
         )
 
         # Generating final video
@@ -136,7 +144,9 @@ async def generate_video_from_content(
         delay_srt(srt_file, title_audio_duration, delayed_srt_file)
 
         final_video = os.path.join(output_dir, "final.mp4")
-        embed_srt_and_audio(overlayed_video, video_audio, delayed_srt_file, final_video)
+        embed_srt_and_audio(
+            overlayed_video, video_audio, delayed_srt_file, final_video, config_preset
+        )
 
         log.info(f"Final video generated at {final_video}")
         if db:

@@ -6,7 +6,7 @@ import asyncio
 
 
 class TestVideoGeneration(unittest.IsolatedAsyncioTestCase):
-    @patch("app.service.generate.ElevenLabs")
+    @patch("app.service.generate.OpenAITTS")
     @patch("app.service.generate.determine_gender_from_text")
     @patch("app.service.generate.update_job_step", new_callable=AsyncMock)
     @patch("app.service.generate.fail_job", new_callable=AsyncMock)
@@ -49,7 +49,13 @@ class TestVideoGeneration(unittest.IsolatedAsyncioTestCase):
         )
 
         await generate.generate_video_from_content(
-            test_id, test_title, test_post, test_base_vid_path, output_dir, mock_session
+            test_id,
+            test_title,
+            test_post,
+            test_base_vid_path,
+            output_dir,
+            mock_session,
+            "test",
         )
 
         expected_final_video_path = os.path.join(output_dir, "final.mp4")

@@ -4,6 +4,8 @@ import os
 
 from typing import cast
 
+from app.config import ffmpeg_config
+
 from app.utils.logger import log
 
 
@@ -13,13 +15,14 @@ class FFMpegProcessingError(Exception):
         self.stderr = stderr
 
 
-def resize_video(video_path: str, output_path: str):
+def resize_video(video_path: str, output_path: str, config_preset="default"):
     """
     Resize a video to maintain a 16:9 aspect ratio on height.
 
     Args:
     video_path (str): The path to the input video file.
     output_file_path (str): The path to the output resized video file.
+    config_preset (str): The configuration preset to use for FFmpeg commands.
 
     Raises:
         FFMpegProcessingError: If an error occurs during the FFmpeg command execution.
@@ -28,6 +31,9 @@ def resize_video(video_path: str, output_path: str):
     log.info("Resizing video...")
     log.debug("Video path: %s", video_path)
     log.debug("Output file path: %s", output_path)
+
+    settings = ffmpeg_config.get(config_preset, ffmpeg_config["default"])
+    log.debug("FFmpeg settings: %s", settings)
 
     width, height = get_video_dimensions(video_path)
     log.debug("Video dimensions: %dx%d", width, height)
@@ -38,10 +44,15 @@ def resize_video(video_path: str, output_path: str):
         (
             ffmpeg.input(video_path)
             .filter("crop", target_width, target_height)
-            .output(output_path, vcodec="libx264", acodec="copy", preset="slow")
-            # .global_args("-loglevel", "error")
-            # .run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
-            .run(overwrite_output=True)
+            .output(
+                output_path, vcodec="libx264", acodec="copy", preset=settings["preset"]
+            )
+            .global_args(*settings["global_args"])
+            .run(
+                overwrite_output=True,
+                capture_stdout=settings["capture_stdout"],
+                capture_stderr=settings["capture_stderr"],
+            )
         )
     except ffmpeg.Error as e:
         raise FFMpegProcessingError(
@@ -50,7 +61,11 @@ def resize_video(video_path: str, output_path: str):
 
 
 def split_video_at_time(
-    video_path: str, start_time: str, duration: float, output_path: str
+    video_path: str,
+    start_time: str,
+    duration: float,
+    output_path: str,
+    config_preset="default",
 ):
     """
     Split a video at a specific time and save the segment as a new video file.
@@ -60,6 +75,7 @@ def split_video_at_time(
     start_time (str): The time in HH:MM:SS format to start the split.
     duration (float): The duration of the segment in seconds.
     output_path (str): The path to save the output video file.
+    config_preset (str): The configuration preset to use for FFmpeg commands.
 
     Raises:
         FFMpegProcessingError: If an error occurs during the FFmpeg command execution.
@@ -71,16 +87,22 @@ def split_video_at_time(
     log.debug("Duration: %s", duration)
     log.debug("Output path: %s", output_path)
 
+    settings = ffmpeg_config.get(config_preset, ffmpeg_config["default"])
+    log.debug("FFmpeg settings: %s", settings)
+
     try:
         (
             ffmpeg.input(video_path, ss=start_time)
             .output(output_path, t=duration, c="copy")
             .global_args("-loglevel", "error")
-            .run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
+            .global_args(*settings["global_args"])
+            .run(
+                overwrite_output=True,
+                capture_stdout=settings["capture_stdout"],
+                capture_stderr=settings["capture_stderr"],
+            )
         )
     except ffmpeg.Error as e:
-        # log.error(f"Error during ffmpeg command: {e.stderr}")
-        # raise
         raise FFMpegProcessingError(
             "Error during split_video_at_time ffmpeg command", stderr=e.stderr
         )
@@ -120,21 +142,22 @@ def split_video(video_path: str, duration: float, output_pattern_path: str):
             .run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
         )
     except ffmpeg.Error as e:
-        # log.error(f"Error during ffmpeg command: {e.stderr}")
-        # raise
         raise FFMpegProcessingError(
             "Error during split_video ffmpeg command", stderr=e.stderr
         )
 
 
-def loop_video_to_audio(audio_duration: float, video_path: str, output_path: str):
+def loop_video_to_audio(
+    audio_duration: float, video_path: str, output_path: str, config_preset="default"
+):
     """
     Loop a video to match the specified audio duration and save it as a new video file.
 
     Args:
-        audio_duration (float): The duration of the audio in seconds.
-        video_path (str): The path to the input video file.
-        output_video_path (str): The path to save the output video file.
+    audio_duration (float): The duration of the audio in seconds.
+    video_path (str): The path to the input video file.
+    output_video_path (str): The path to save the output video file.
+    config_preset (str): The configuration preset to use for FFmpeg commands.
 
     Raises:
         FFMpegProcessingError: If an error occurs during the FFmpeg command execution.
@@ -144,6 +167,9 @@ def loop_video_to_audio(audio_duration: float, video_path: str, output_path: str
     log.debug("Audio duration: %s", audio_duration)
     log.debug("Video path: %s", video_path)
     log.debug("Output video path: %s", output_path)
+
+    settings = ffmpeg_config.get(config_preset, ffmpeg_config["default"])
+    log.debug("FFmpeg settings: %s", settings)
 
     video_duration = get_video_duration(video_path)
     log.debug("Video duration: %s", video_duration)
@@ -158,14 +184,16 @@ def loop_video_to_audio(audio_duration: float, video_path: str, output_path: str
                 output_path,
                 vf=f"trim=duration={audio_duration}",
                 acodec="copy",
-                preset="slow",
+                preset=settings["preset"],
             )
-            .global_args("-loglevel", "error")
-            .run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
+            .global_args(*settings["global_args"])
+            .run(
+                overwrite_output=True,
+                capture_stdout=settings["capture_stdout"],
+                capture_stderr=settings["capture_stderr"],
+            )
         )
     except ffmpeg.Error as e:
-        # log.error(f"Error during ffmpeg command: {e.stderr}")
-        # raise
         raise FFMpegProcessingError(
             "Error during loop_video_to_audio ffmpeg command", stderr=e.stderr
         )
@@ -203,7 +231,11 @@ def concatenate_audios(audio_path1: str, audio_path2: str, output_path: str):
 
 
 def overlay_image_on_video(
-    video_path: str, image_path: str, duration: int, output_path: str
+    video_path: str,
+    image_path: str,
+    duration: int,
+    output_path: str,
+    config_preset="default",
 ):
     """
     Overlay an image on a video
@@ -213,6 +245,7 @@ def overlay_image_on_video(
     image_path (str): Path to the image file to overlay.
     duration (int): Duration in seconds for which the image should be visible on the video.
     output_path (str): Path to the output video file.
+    config_preset (str): The configuration preset to use for FFmpeg commands.
 
     Raises:
         FFMpegProcessingError: If an error occurs during the FFmpeg command execution.
@@ -223,6 +256,9 @@ def overlay_image_on_video(
     log.debug("Image path: %s", image_path)
     log.debug("Duration: %s", duration)
     log.debug("Output path: %s", output_path)
+
+    settings = ffmpeg_config.get(config_preset, ffmpeg_config["default"])
+    log.debug("FFmpeg settings: %s", settings)
 
     try:
         input_video = ffmpeg.input(video_path)
@@ -236,13 +272,17 @@ def overlay_image_on_video(
                 y="(H-h)/2",
                 enable=f"between(t,0,{duration})",
             )
-            .output(output_path, vcodec="libx264", acodec="copy", preset="slow")
-            .global_args("-loglevel", "error")
-            .run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
+            .output(
+                output_path, vcodec="libx264", acodec="copy", preset=settings["preset"]
+            )
+            .global_args(*settings["global_args"])
+            .run(
+                overwrite_output=True,
+                capture_stdout=settings["capture_stdout"],
+                capture_stderr=settings["capture_stderr"],
+            )
         )
     except ffmpeg.Error as e:
-        # log.error(f"Error during ffmpeg command: {e.stderr}")
-        # raise
         raise FFMpegProcessingError(
             "Error during overlay_image_on_video ffmpeg command", stderr=e.stderr
         )
@@ -278,8 +318,6 @@ def resize_image(image_path: str, target_width: int, output_path: str):
             .run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
         )
     except ffmpeg.Error as e:
-        # log.error(f"Error during ffmpeg command: {e.stderr}")
-        # raise
         raise FFMpegProcessingError(
             "Error during resize_image ffmpeg command", stderr=e.stderr
         )
@@ -322,14 +360,18 @@ def buffer_audio(audio_path: str, pos: str, duration: float, output_path: str):
             .run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
         )
     except ffmpeg.Error as e:
-        # log.error(f"Error during ffmpeg command: {e.stderr}")
-        # raise
         raise FFMpegProcessingError(
             "Error during buffer_audio ffmpeg command", stderr=e.stderr
         )
 
 
-def embed_srt_and_audio(video_path, audio_path, srt_path, output_path):
+def embed_srt_and_audio(
+    video_path: str,
+    audio_path: str,
+    srt_path: str,
+    output_path: str,
+    config_preset="default",
+):
     """
     Embeds subtitles and audio into a video file using FFmpeg.
 
@@ -338,6 +380,7 @@ def embed_srt_and_audio(video_path, audio_path, srt_path, output_path):
         audio_path (str): The path to the input audio file.
         srt_path (str): The path to the input subtitle file in SRT format.
         output_path (str): The path to save the output video file.
+        config_preset (str): The configuration preset to use for FFmpeg commands.
 
     Raises:
         FFMpegProcessingError: If an error occurs during the FFmpeg command execution.
@@ -348,6 +391,9 @@ def embed_srt_and_audio(video_path, audio_path, srt_path, output_path):
     log.debug("Audio path: %s", audio_path)
     log.debug("SRT path: %s", srt_path)
     log.debug("Output path: %s", output_path)
+
+    settings = ffmpeg_config.get(config_preset, ffmpeg_config["default"])
+    log.debug("FFmpeg settings: %s", settings)
 
     subtitles_filter = f"subtitles={srt_path}:force_style='FontName=Mont,FontSize=18,PrimaryColour=&H00ffffff,OutlineColour=&H00000000,BackColour=&H80000000,Bold=1,Italic=0,Alignment=10,Outline=1.5'"
     try:
@@ -362,15 +408,16 @@ def embed_srt_and_audio(video_path, audio_path, srt_path, output_path):
                 # Quality optimizations
                 audio_bitrate="192k",
                 crf=20,
-                preset="slow",
-                # preset="ultrafast",
+                preset=settings["preset"],
             )
-            .global_args("-loglevel", "error")
-            .run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
+            .global_args(*settings["global_args"])
+            .run(
+                overwrite_output=True,
+                capture_stdout=settings["capture_stdout"],
+                capture_stderr=settings["capture_stderr"],
+            )
         )
     except ffmpeg.Error as e:
-        # log.error(f"Error during ffmpeg command: {e.stderr}")
-        # raise
         raise FFMpegProcessingError(
             "Error during embed_srt_and_audio ffmpeg command", stderr=e.stderr
         )
@@ -472,25 +519,35 @@ def get_audio_duration(audio_path: str):
 
 
 # Some additional logic to compress test files
-def compress_video(input_path, output_path):
+def compress_video(input_path, output_path, config_preset="default"):
     """Compress video files to a lower bitrate."""
+    log.info("Compressing video...")
+    log.debug("Input path: %s", input_path)
+    log.debug("Output path: %s", output_path)
+
+    settings = ffmpeg_config.get(config_preset, ffmpeg_config["default"])
+    log.debug("FFmpeg settings: %s", settings)
+    log
+
     try:
         (
             ffmpeg.input(input_path)
             .output(
                 output_path,
                 vcodec="libx264",
-                crf=28,
-                preset="fast",
+                crf=settings["crf"],
+                preset=settings["preset"],
                 acodec="aac",
                 strict="experimental",
             )
-            .global_args("-loglevel", "error")
-            .run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
+            .global_args(*settings["global_args"])
+            .run(
+                overwrite_output=True,
+                capture_stdout=settings["capture_stdout"],
+                capture_stderr=settings["capture_stderr"],
+            )
         )
     except ffmpeg.Error as e:
-        # log.error(f"Error during ffmpeg command: {e.stderr}")
-        # raise
         raise FFMpegProcessingError(
             "Error during compress_video ffmpeg command", stderr=e.stderr
         )
