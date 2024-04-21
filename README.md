@@ -19,6 +19,9 @@ Steps:
 1. Detemine gender, improve the language in the post, and generate audio for the video.
 2. Generate SRT (subtitiles) for the video.
 3. Generate a title image for the video.
+
+
+
 4. Loop/Generate a background video
 5. Stitch all of the above together to create a final video.
 
@@ -33,7 +36,7 @@ You can find the TikTok account that is used to post these videos here:
 
 Here is a clip of the output of the application, a TikTok-Ready video generated from a Reddit Post:
 
-[Compressed Example Output](https://github.com/jwtly10/reddit-tiktok-gen/assets/39057715/dc6ff29f-2245-4701-8dec-51e89d3a9f75)
+[Example Output](https://github.com/jwtly10/reddit-tiktok-gen/assets/39057715/84f215b9-5510-4d83-8f02-0a3513f10a97)
 
 Here is a demo of the starting and usage of the web app that is used to interact with the generator:
 
