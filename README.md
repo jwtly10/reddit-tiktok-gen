@@ -1,7 +1,14 @@
 # Reddit-Tiktok-Gen
+This application is an automation for generating Reddit-Stories style videos for TikTok.
+
+🚧 Still in active development, with some known areas to optimize. 🚧
+
+Currently creating videos with viable levels of quality can take between 5 and 10 minutes per video, so the most optimal way to run this currently is using a VM with a service such as https://www.cudocompute.com/, and SSH into the VM to run the app using the built in scripts.
+
+You can find the TikTok account that is used to post some of these videos here:
+[@ReddReelStoryz](https://www.tiktok.com/@reddreelstoryz)
 
 ### Dependencies:
-
 - Python 3.12 - (https://www.python.org/downloads/)
 - ffmpeg - (https://ffmpeg.org/download.html)
 - Redis - (docker run --name redis -d -p 6379:6379 redis)
@@ -11,24 +18,16 @@
 Fortunately, docker-compose will take care of all of these dependencies for you if you intend to just run the app, you only need to have docker installed.
 
 ## How it works
-
-This application is essentially an automation of a series of steps to go from a Reddit Post to a TikTok-Ready video.
-
 Steps:
 
-1. Detemine gender, improve the language in the post, and generate audio for the video.
+1. Determine gender, improve the language in the post, and generate audio for the video.
 2. Generate SRT (subtitiles) for the video.
 3. Generate a title image for the video.
-
-
-
 4. Loop/Generate a background video
 5. Stitch all of the above together to create a final video.
 
 While efforts have been made to reduce storage usage, the app still requires a few GB of storage to run. There are a few temp files that are generated and deleted during the process, before creating a final video which may be a few 100MBs in size, depending on optimizations.
 
-You can find the TikTok account that is used to post these videos here:
-[@ReddReelStoryz](https://www.tiktok.com/@reddreelstoryz)
 
 ### Demos:
 
@@ -46,11 +45,13 @@ Here is a demo of the starting and usage of the web app that is used to interact
 
 There are also some scripts in `./scripts` that expose some of the functionality of the app.
 
-[./scripts/generate_videos_from_json.py](https://github.com/jwtly10/reddit-tiktok-gen/blob/main/scripts/quick_generate.py)
+[./scripts/generate_videos_from_json.py](https://github.com/jwtly10/reddit-tiktok-gen/blob/main/scripts/generate_videos_from_json.py)
 Exposes the functionality of the app to generate videos from a JSON file, for example:
 
+I use this script on the SSH machine, as I can run multiple generations in parallel, and it is much faster than running the app in a single thread.
 ```sh
-python -m scripts.generate_videos_from_json path/to/json/videos.json path/to/output/directory
+# "Usage: python generate_videos_from_json.py <import_file_path> <output_directory> <config_preset> <parallel_processes>"
+python -m scripts.generate_videos_from_json path/to/json/videos.json path/to/output/directory 4
 ```
 
 With the following JSON file
@@ -114,15 +115,7 @@ Duplicate this fileunder `project-root/.env` for local development - [local_exam
 
 ## Installation
 
-This prescript is required to download media files for video generation. It downloads some copyright-free background videos that are used in the final video.
-
-```sh
-wget -O /assets/background_videos/1.mp4 www.myserver.com/1.mp4
-wget -O /assets/background_videos/2.mp4 www.myserver.com/2.mp4
-wget -O /assets/background_videos/3.mp4 www.myserver.com/3.mp4
-```
-
-You can then clone the repo and build the docker image, dependencies and start the container.
+You clone the repo and build the docker image, dependencies and start the container.
 
 ```sh
 git clone https://github.com/jwtly10/reddit-tiktok-gen.git &&
@@ -130,21 +123,24 @@ cd reddit-tiktok-gen &&
 docker-compose up --build
 ```
 
-You can also change the title template username by cloning this template:
-https://www.canva.com/design/DAF5rWrG-H8/zYOAKN_LO8plXZbOTihu-g/view
+However there are some additional steps that need to be taken in order to run the app, in particular adding media files that are too large for VCS.
+
+Here is a script that downloads some default background videos that can be used for generation:
+```sh
+# TODO
+# For now, you can download your own background videos and run
+# python -m scripts.add_new_background_video path/to/video.mp4)
+# Ensuring the video file name saved as
+# assets/background_videos/minecraft_background_video_1.mp4
+```
 
 ## Tech Stack
 
 - Python 3.12
 - Celery on top of Redis
 - SQLite
-- FastAPI
+- FastAPI w/ SSR
 - Docker
-- SSR (Server Side Rendering)
-
-## Contributing
-
-Bug reports and pull requests are welcome!
 
 ## License
 

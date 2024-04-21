@@ -10,7 +10,7 @@ import os
 
 ## check for .mp4 extension
 if len(sys.argv) != 2:
-    print("Usage: python -m scripts.add_new_background_video.py")
+    print("Usage: python -m scripts.add_new_background_video.py <video_file>")
     print(
         "This script will format and compress uncropped mp4 videos for usage in the app. Your new video will be saved in the assets/background_video directory."
     )
@@ -19,11 +19,11 @@ if len(sys.argv) != 2:
 if sys.argv[1].endswith(".mp4"):
     print("Formatting video...")
     file_name = os.path.basename(sys.argv[1])
-    output_dir = os.path.join("assets", "background_videos")
+    output_dir = os.path.join("assets")
     formatted_file = os.path.join(output_dir, file_name)
     os.makedirs(output_dir, exist_ok=True)
     try:
-        print("This may take a while...")
+        print("This may take a few minutes depending on the resolution and length of the original video...")
         resize_video(sys.argv[1], formatted_file)
     except FFMpegProcessingError as e:
         print(f"Error: {e.stderr}")
